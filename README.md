@@ -1,5 +1,5 @@
 <p align="left">
-  <img src="media/logo.png" alt="Agentic AI Cloud Security Framework" width="200">
+  <img src="media/framework-logo.png" alt="Agentic AI Cloud Security Framework" width="200">
 </p>
 
 # Agentic AI Cloud Security Framework
