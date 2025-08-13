@@ -5,6 +5,20 @@
 
 A comprehensive security framework for implementing controls in agentic AI cloud environments. This framework provides guidance, control catalogs, templates, and example configurations to help organizations secure AI agents and tools operating across cloud infrastructure.
 
+## Why This Framework Exists
+
+While security frameworks like NIST AI RMF and ISO/IEC 42001 provide excellent governance guidance, they leave a critical gap: **how do you actually implement AI security controls in production cloud environments?**
+
+This framework bridges that gap by providing:
+
+- **Production-ready infrastructure code** instead of high-level recommendations
+- **AI-specific security controls** for agentic behavior, tool policies, and retrieval safety
+- **Multi-cloud implementations** with consistent security across AWS, Azure, and GCP
+- **Automated validation** that proves controls work with built-in evidence collection
+- **Standards alignment** mapping to ISO/IEC 42001, NIST frameworks, and SOC2
+
+**The result:** Teams can deploy secure AI agents in weeks rather than months, with audit-ready evidence and compliance documentation built in.
+
 ## How Do I Actually Use This?
 
 Think of this as a **security cookbook** for companies deploying AI agents in the cloud. Instead of starting from scratch, you get:
