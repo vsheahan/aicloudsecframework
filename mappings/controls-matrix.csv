@@ -1,11 +1,3 @@
-Control ID,Title,Risk,Owner,Status,Evidence,NIST CSF,ISO/IEC 42001
-A1,Access Control,Unauthorized access risk,Security Team,Implemented,Access logs,PR.AC-1,Clause 5.1
-A2,Data Encryption,Data breach risk,Security Team,Implemented,Encryption certificates,PR.DS-2,Clause 7.3
-A3,Incident Response,Delayed response risk,Incident Team,In Progress,Response plan,RS.RP-1,Clause 9.4
-A4,Audit Logging,Lack of traceability,Compliance Team,Implemented,Audit logs,DE.CM-7,Clause 10.2
-A5,User Training,Human error risk,HR Team,Planned,Training records,PR.AT-1,Clause 8.5
-A6,Physical Security,Physical breach risk,Facilities Team,Implemented,Access logs,PR.PT-1,Clause 6.7
-
 Control ID,Title,Risk,Owner,Status,Evidence,NIST CSF,NIST 800-53 Rev5,ISO 27001:2022,ISO 27017,ISO 27018,ISO 27701,SOC2,ISO/IEC 42001
 A1,Identity for Agents and Tools,Privilege misuse,,, ,PR.AC-1,"AC-2, AC-6","A.5.15, A.8.2",12.1.5,10.1.1,7.2.2,CC6.1,"5.4.2; 6.3.3"
 A2,Tool Policy and Budget Guards,Unbounded actions,,, ,PR.AC-4,"CM-7, AU-12",A.8.16,12.4.5,11.1.1,8.2.1,CC7.2,"6.3.4"
