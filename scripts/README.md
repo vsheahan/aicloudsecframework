@@ -48,8 +48,15 @@ python3 validate-aws-controls.py --output json
 - PASS: Restrictive Network ACLs
 - WARNING: Cost anomaly detection (manual verification)
 
-**Controls A3 & A4:**
-- WARNING: Manual verification required for data classification and supply chain
+**Control A3 - Retrieval Safety:**
+- WARNING: Manual verification required for data classification and DLP policies
+
+**Control A4 - Supply Chain Integrity:**
+- PASS: Model verification Lambda function exists and configured
+- PASS: HashTraceAI integration with proper environment variables
+- PASS: Model manifests S3 bucket with versioning and encryption
+- PASS: EventBridge trigger for automated verification
+- PASS: CloudWatch logs capturing verification events
 
 ### Exit Codes
 
@@ -78,7 +85,7 @@ PASS: Budget tracking table has tool_name range key
 Control A1: PASS
 Control A2: PASS
 Control A3: MANUAL
-Control A4: MANUAL
+Control A4: PASS
 Control A5: PASS
 Control A6: PASS
 

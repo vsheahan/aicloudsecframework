@@ -393,6 +393,340 @@ aws ec2 describe-network-acls --filters "Name=vpc-id,Values=$(terraform output -
 curl -I https://example.com  # Should timeout or fail
 ```
 
+## Control A4: Supply Chain Integrity with HashTraceAI
+
+```hcl
+# S3 bucket for storing model manifests and signatures
+resource "aws_s3_bucket" "model_manifests" {
+  bucket = "ai-model-manifests-${random_string.suffix.result}"
+  
+  tags = {
+    Purpose = "AI-Model-Verification"
+    Control = "A4"
+  }
+}
+
+resource "aws_s3_bucket_versioning" "model_manifests_versioning" {
+  bucket = aws_s3_bucket.model_manifests.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "model_manifests_encryption" {
+  bucket = aws_s3_bucket.model_manifests.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# Lambda function for automated model verification
+resource "aws_lambda_function" "model_verification" {
+  filename         = "model_verification.zip"
+  function_name    = "ai-model-verification"
+  role            = aws_iam_role.model_verification_role.arn
+  handler         = "lambda_function.lambda_handler"
+  runtime         = "python3.9"
+  timeout         = 300
+
+  environment {
+    variables = {
+      MANIFEST_BUCKET = aws_s3_bucket.model_manifests.bucket
+      PUBLIC_KEY_PATH = "/opt/verification_keys/public_key.pem"
+    }
+  }
+
+  layers = [aws_lambda_layer_version.hashtraceai_layer.arn]
+
+  tags = {
+    Purpose = "AI-Model-Verification"
+    Control = "A4"
+  }
+}
+
+# Lambda layer with HashTraceAI dependencies
+resource "aws_lambda_layer_version" "hashtraceai_layer" {
+  filename   = "hashtraceai_layer.zip"
+  layer_name = "hashtraceai-dependencies"
+
+  compatible_runtimes = ["python3.9"]
+  
+  description = "HashTraceAI and cryptography dependencies for model verification"
+}
+
+# IAM role for model verification Lambda
+resource "aws_iam_role" "model_verification_role" {
+  name = "ai-model-verification-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+
+  tags = {
+    Purpose = "AI-Model-Verification"
+    Control = "A4"
+  }
+}
+
+resource "aws_iam_policy" "model_verification_policy" {
+  name = "ai-model-verification-policy"
+  
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          aws_s3_bucket.model_manifests.arn,
+          "${aws_s3_bucket.model_manifests.arn}/*",
+          "arn:aws:s3:::${var.approved_models_bucket}",
+          "arn:aws:s3:::${var.approved_models_bucket}/*"
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "model_verification_policy_attachment" {
+  role       = aws_iam_role.model_verification_role.name
+  policy_arn = aws_iam_policy.model_verification_policy.arn
+}
+
+# EventBridge rule to trigger verification on model uploads
+resource "aws_cloudwatch_event_rule" "model_upload_trigger" {
+  name        = "ai-model-upload-trigger"
+  description = "Trigger model verification when new models are uploaded"
+
+  event_pattern = jsonencode({
+    source      = ["aws.s3"]
+    detail-type = ["Object Created"]
+    detail = {
+      bucket = {
+        name = [var.approved_models_bucket]
+      }
+      object = {
+        key = [{
+          suffix = ".bin"
+        }, {
+          suffix = ".safetensors"
+        }, {
+          suffix = ".onnx"
+        }]
+      }
+    }
+  })
+
+  tags = {
+    Purpose = "AI-Model-Verification-Trigger"
+    Control = "A4"
+  }
+}
+
+resource "aws_cloudwatch_event_target" "model_verification_target" {
+  rule      = aws_cloudwatch_event_rule.model_upload_trigger.name
+  target_id = "ModelVerificationTarget"
+  arn       = aws_lambda_function.model_verification.arn
+}
+
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.model_verification.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.model_upload_trigger.arn
+}
+```
+
+## HashTraceAI Lambda Function Implementation
+
+```python
+# lambda_function.py for model verification
+import json
+import boto3
+import hashlib
+import subprocess
+import os
+from pathlib import Path
+
+def lambda_handler(event, context):
+    """
+    Verify model integrity using HashTraceAI when new models are uploaded
+    """
+    s3 = boto3.client('s3')
+    
+    # Extract S3 event details
+    bucket = event['detail']['bucket']['name']
+    key = event['detail']['object']['key']
+    
+    try:
+        # Download the model file
+        local_path = f"/tmp/{Path(key).name}"
+        s3.download_file(bucket, key, local_path)
+        
+        # Look for corresponding manifest
+        manifest_key = f"{key}.manifest.json"
+        manifest_path = f"/tmp/{Path(manifest_key).name}"
+        
+        try:
+            s3.download_file(bucket, manifest_key, manifest_path)
+        except s3.exceptions.NoSuchKey:
+            return {
+                'statusCode': 400,
+                'body': json.dumps({
+                    'error': f'No manifest found for {key}',
+                    'control': 'A4',
+                    'status': 'FAIL'
+                })
+            }
+        
+        # Verify using HashTraceAI
+        verification_result = verify_model_integrity(local_path, manifest_path)
+        
+        # Log results to CloudWatch
+        print(json.dumps({
+            'model_file': key,
+            'verification_status': verification_result['status'],
+            'control': 'A4',
+            'timestamp': verification_result['timestamp']
+        }))
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps(verification_result)
+        }
+        
+    except Exception as e:
+        error_result = {
+            'error': str(e),
+            'model_file': key,
+            'control': 'A4',
+            'status': 'ERROR'
+        }
+        print(json.dumps(error_result))
+        return {
+            'statusCode': 500,
+            'body': json.dumps(error_result)
+        }
+
+def verify_model_integrity(model_path, manifest_path):
+    """
+    Use HashTraceAI to verify model integrity
+    """
+    try:
+        # Run HashTraceAI verification
+        cmd = [
+            'python3', '/opt/hashtraceai/cli.py', 'verify',
+            '--manifest-file', manifest_path,
+            '--public-key', '/opt/verification_keys/public_key.pem',
+            '--format', 'json'
+        ]
+        
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+        
+        if result.returncode == 0:
+            return {
+                'status': 'VERIFIED',
+                'output': result.stdout,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+        else:
+            return {
+                'status': 'VERIFICATION_FAILED',
+                'error': result.stderr,
+                'timestamp': datetime.utcnow().isoformat()
+            }
+            
+    except subprocess.TimeoutExpired:
+        return {
+            'status': 'TIMEOUT',
+            'error': 'Verification timeout after 60 seconds',
+            'timestamp': datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        return {
+            'status': 'ERROR',
+            'error': str(e),
+            'timestamp': datetime.utcnow().isoformat()
+        }
+```
+
+## Deployment Instructions for A4
+
+```bash
+# 1. Package HashTraceAI for Lambda
+mkdir -p /tmp/hashtraceai_layer/python
+pip install -r hashtraceai/requirements.txt -t /tmp/hashtraceai_layer/python/
+cp -r hashtraceai/ /tmp/hashtraceai_layer/python/
+cd /tmp/hashtraceai_layer && zip -r hashtraceai_layer.zip .
+
+# 2. Package Lambda function
+zip model_verification.zip lambda_function.py
+
+# 3. Deploy infrastructure
+terraform apply
+
+# 4. Upload verification keys
+aws s3 cp verification_keys/public_key.pem s3://your-lambda-bucket/verification_keys/
+```
+
+## Evidence Collection for A4
+
+**Supply Chain Integrity Evidence:**
+```bash
+# Verify HashTraceAI deployment
+aws lambda get-function --function-name ai-model-verification
+
+# Check recent model verifications
+aws logs filter-log-events \
+  --log-group-name /aws/lambda/ai-model-verification \
+  --filter-pattern '{ $.control = "A4" }'
+
+# Verify manifest storage
+aws s3 ls s3://$(terraform output -raw model_manifests_bucket)/
+```
+
+**Create Model Manifest Example:**
+```bash
+# Generate manifest for approved model
+cd /path/to/model
+python3 /path/to/hashtraceai/cli.py generate \
+  --path . \
+  --created-by "Security Team" \
+  --model-name "Production-Model-v1" \
+  --model-version "1.0" \
+  --sign-key private_key.pem
+
+# Upload to S3 with manifest
+aws s3 cp model.bin s3://approved-models-bucket/models/
+aws s3 cp Production-Model-v1_1.0_manifest.json s3://approved-models-bucket/models/model.bin.manifest.json
+```
+
 ---
 
 ## CloudFormation Alternative

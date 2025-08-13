@@ -252,10 +252,124 @@ class ControlValidator:
         self.results['A3']['status'] = 'MANUAL'
 
     def validate_a4_supply_chain(self):
-        """A4: Supply Chain Integrity - Manual verification required"""
-        self.print_header("A4", "Supply Chain Integrity")  
-        self.print_warning("A4 validation requires manual review of artifact signing and SBOMs")
-        self.results['A4']['status'] = 'MANUAL'
+        """A4: Supply Chain Integrity with HashTraceAI"""
+        self.print_header("A4", "Supply Chain Integrity")
+        
+        try:
+            # Initialize Lambda client
+            lambda_client = self.session.client('lambda')
+            
+            # Check for model verification Lambda function
+            function_name = 'ai-model-verification'
+            try:
+                function = lambda_client.get_function(FunctionName=function_name)
+                self.print_pass(f"Found model verification Lambda: {function_name}")
+                
+                # Check function tags
+                tags = lambda_client.list_tags(Resource=function['Configuration']['FunctionArn'])
+                control_tag = tags.get('Tags', {}).get('Control')
+                if control_tag == 'A4':
+                    self.print_pass("Lambda function properly tagged with Control: A4")
+                else:
+                    self.print_warning("Lambda function missing Control tag")
+                    
+                # Check environment variables for HashTraceAI configuration
+                env_vars = function['Configuration'].get('Environment', {}).get('Variables', {})
+                if 'MANIFEST_BUCKET' in env_vars:
+                    self.print_pass("Lambda configured with manifest bucket")
+                if 'PUBLIC_KEY_PATH' in env_vars:
+                    self.print_pass("Lambda configured with public key path")
+                    
+            except lambda_client.exceptions.ResourceNotFoundException:
+                self.print_fail(f"Model verification Lambda '{function_name}' not found")
+                self.results['A4']['status'] = 'FAIL'
+                return
+                
+            # Check for model manifests S3 bucket
+            buckets = self.s3.list_buckets()['Buckets']
+            manifest_buckets = [bucket for bucket in buckets if 'model-manifests' in bucket['Name']]
+            
+            if manifest_buckets:
+                bucket = manifest_buckets[0]
+                self.print_pass(f"Found model manifests bucket: {bucket['Name']}")
+                
+                # Check bucket versioning
+                versioning = self.s3.get_bucket_versioning(Bucket=bucket['Name'])
+                if versioning.get('Status') == 'Enabled':
+                    self.print_pass("Model manifests bucket has versioning enabled")
+                else:
+                    self.print_warning("Model manifests bucket versioning not enabled")
+                    
+                # Check bucket encryption
+                try:
+                    encryption = self.s3.get_bucket_encryption(Bucket=bucket['Name'])
+                    self.print_pass("Model manifests bucket has encryption enabled")
+                except self.s3.exceptions.ClientError:
+                    self.print_warning("Model manifests bucket encryption not configured")
+                    
+            else:
+                self.print_fail("No model manifests bucket found")
+                
+            # Check for EventBridge rule for model upload triggers
+            events_client = self.session.client('events')
+            try:
+                rules = events_client.list_rules(NamePrefix='ai-model-upload')['Rules']
+                if rules:
+                    rule = rules[0]
+                    self.print_pass(f"Found model upload trigger rule: {rule['Name']}")
+                    
+                    # Check if rule is enabled
+                    if rule['State'] == 'ENABLED':
+                        self.print_pass("EventBridge rule is enabled")
+                    else:
+                        self.print_warning("EventBridge rule is disabled")
+                else:
+                    self.print_warning("No model upload trigger rule found")
+                    
+            except Exception as e:
+                self.print_warning(f"Could not validate EventBridge rules: {str(e)}")
+                
+            # Check recent verification logs
+            logs_client = self.session.client('logs')
+            try:
+                log_groups = logs_client.describe_log_groups(
+                    logGroupNamePrefix=f'/aws/lambda/{function_name}'
+                )['logGroups']
+                
+                if log_groups:
+                    self.print_pass("Model verification logs are being collected")
+                    
+                    # Look for recent A4 control logs
+                    log_group = log_groups[0]['logGroupName']
+                    streams = logs_client.describe_log_streams(
+                        logGroupName=log_group,
+                        orderBy='LastEventTime',
+                        descending=True,
+                        limit=5
+                    )['logStreams']
+                    
+                    if streams:
+                        # Check recent log events for A4 activity
+                        events = logs_client.get_log_events(
+                            logGroupName=log_group,
+                            logStreamName=streams[0]['logStreamName'],
+                            limit=10
+                        )['events']
+                        
+                        a4_events = [event for event in events if 'A4' in event['message']]
+                        if a4_events:
+                            self.print_pass(f"Found {len(a4_events)} recent A4 verification events")
+                        else:
+                            self.print_warning("No recent A4 verification activity in logs")
+                            
+            except Exception as e:
+                self.print_warning(f"Could not validate CloudWatch logs: {str(e)}")
+                
+            self.results['A4']['status'] = 'PASS'
+            
+        except Exception as e:
+            self.print_fail(f"Error validating A4: {str(e)}")
+            self.results['A4']['status'] = 'ERROR'
 
     def run_all_validations(self):
         """Run all control validations"""

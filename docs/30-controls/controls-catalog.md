@@ -33,14 +33,33 @@ Sensitive content is classified and filtered before retrieval; access governed b
 **Evidence:** Classifier configuration; DLP rule IDs; retrieval audit log with subject attributes.
 
 ## A4. Supply Chain Integrity
-- **Intent**: Assure integrity of datasets, weights, prompts, and packages.
-- **Implement**: Signed artifacts, checksums, provenance metadata, SBOMs.
-- **Evidence**: Sigstore logs, SBOMs, attestation records.
+- **Intent**: Assure integrity of datasets, weights, prompts, and packages using cryptographic verification.
+- **Implement**: SHA-256 hashing, RSA digital signatures, automated verification pipelines, HashTraceAI integration.
+- **Evidence**: Signed manifests, verification logs, HashTraceAI attestation records, deployment pipeline checks.
 - **Mappings**: NIST SI-7, SA-12; ISO 27001 A.5.23; ISO/IEC 42001 6.4.5, 6.5.5; SOC2 CC1.2
 
+### Implementation Details
+
+**HashTraceAI Integration:**
+- Generate cryptographically signed manifests with SHA-256 file hashes
+- Automated verification using RSA signatures and password-protected keys
+- Event-driven verification triggered by model uploads
+- Multi-cloud support (AWS Lambda, Azure Functions, GCP Cloud Functions)
+
+**Key Components:**
+- **Manifest Generation**: `hashtraceai generate --sign-key private.pem`
+- **Automated Verification**: Event-triggered verification functions
+- **Secure Storage**: Encrypted storage with versioning for manifests
+- **Audit Logging**: Complete verification trails in CloudWatch/Log Analytics
+
+**Deployment Patterns:**
+- **AWS**: Lambda + S3 + EventBridge + CloudTrail integration
+- **Azure**: Functions + Storage + Event Grid + Monitor integration  
+- **GCP**: Cloud Functions + Storage + Pub/Sub + Logging integration
+
 ### Check
-All datasets, weights, and packages are signed and verified at pull; SBOMs present for tools and images.
-**Evidence:** Sigstore/Rekor entries; checksum records; SBOM artifacts in repository.
+All model artifacts have cryptographically signed manifests verified before deployment; automated pipeline blocks unverified models.
+**Evidence:** HashTraceAI manifest with valid signature; deployment logs showing verification pass/fail; blocked deployment of unsigned model.
 
 ## A5. Observation and Forensics
 - **Intent**: End to end trace of agent decisions and tool actions.
