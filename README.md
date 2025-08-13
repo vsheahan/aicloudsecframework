@@ -177,34 +177,43 @@ Please read the [Contributing Guidelines](CONTRIBUTING.md) and [Code of Conduct]
 ## Roadmap
 
 ### Current Version (v1.0)
-- Core A1-A6 controls framework
-- Multi-cloud examples (AWS, Azure, GCP)
-- Standards mapping (NIST, ISO, SOC2)
-- Policy and documentation templates
+- Core A1-A6 controls framework with comprehensive implementation guidance
+- Production-ready multi-cloud examples (AWS, Azure, GCP) with Terraform
+- HashTraceAI integration for automated supply chain integrity (Control A4)
+- Event-driven cryptographic verification pipelines across all major clouds
+- Automated validation tooling with evidence collection
+- Policy templates including model verification governance
+- Standards mapping (NIST, ISO/IEC 42001, ISO 27001, SOC2)
+- CloudFormation alternatives for AWS implementations
 
 ### Upcoming (v1.1)
-- **Enhanced Implementation Examples**
-  - Complete Terraform modules for each control
-  - CloudFormation templates
-  - Kubernetes manifests for containerized agents
-- **Validation Tooling**
-  - Automated compliance checking scripts
-  - Evidence collection automation
-  - Control implementation scanners
+- **Enhanced Deployment Options**
+  - Kubernetes manifests for containerized AI agents
+  - Helm charts for streamlined deployment
+  - Docker Compose configurations for development
+- **Advanced Validation**
+  - Multi-cloud validation scripts (Azure, GCP equivalents)
+  - Control implementation scanners with remediation guidance
+  - Compliance dashboard with real-time status
+- **Integration Enhancements**
+  - GitHub Actions workflows for automated validation
+  - Pre-commit hooks for policy compliance
+  - Integration with popular ML platforms (MLflow, Kubeflow)
 
 ### Future (v2.0+)
 - **Extended Framework**
   - Additional controls (A7-A12) for advanced scenarios
-  - Federated AI security patterns
-  - Edge deployment guidance
+  - Federated AI security patterns for multi-organization deployments
+  - Edge deployment guidance for distributed AI systems
 - **Ecosystem Integration**
-  - CI/CD pipeline integration
-  - Policy-as-code tooling
-  - Real-time compliance dashboards
+  - Native CI/CD pipeline plugins (Jenkins, GitLab, Azure DevOps)
+  - Policy-as-code tooling with drift detection
+  - Integration with security orchestration platforms (SOAR)
 - **Community Features**
-  - Shared threat intelligence
-  - Implementation case studies
-  - Security benchmarks and baselines
+  - Shared threat intelligence for AI-specific attacks
+  - Implementation case studies from production deployments
+  - Security benchmarks and industry baselines
+  - Certification program for framework implementations
 
 ## Standards Compliance
 
