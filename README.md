@@ -1,3 +1,7 @@
+<p align="left">
+  <img src="media/logo.png" alt="Agentic AI Cloud Security Framework" width="200">
+</p>
+
 # Agentic AI Cloud Security Framework
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
