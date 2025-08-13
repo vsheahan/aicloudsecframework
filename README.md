@@ -5,7 +5,49 @@
 
 A comprehensive security framework for implementing controls in agentic AI cloud environments. This framework provides guidance, control catalogs, templates, and example configurations to help organizations secure AI agents and tools operating across cloud infrastructure.
 
-##  What This Framework Provides
+## How Do I Actually Use This?
+
+Think of this as a **security cookbook** for companies deploying AI agents in the cloud. Instead of starting from scratch, you get:
+
+- **Expert guidance** you customize to your needs
+- **Copy-paste templates** for policies and configurations  
+- **Step-by-step checklists** with concrete examples
+- **Compliance mappings** to show auditors
+
+### Who Uses This Framework
+
+**Companies deploying AI agents** who need to answer: "How do we make this secure and compliant?"
+
+**Common scenarios:**
+- **CTO**: Deploying AI chatbots on AWS, needs security checklist
+- **Security Engineer**: Boss said "secure our AI agents" - uses A1-A6 controls as implementation guide
+- **Compliance Officer**: Auditor asks "How do you secure AI workloads?" - points to NIST/ISO mappings
+- **DevOps Team**: Needs Terraform examples for secure AI infrastructure
+
+### Real Usage Pattern: AI Customer Service Agent
+
+```bash
+# 1. Clone and explore
+git clone https://github.com/vsheahan/aicloudsecframework.git
+cat docs/30-controls/controls-catalog.md  # Review A1-A6 controls
+
+# 2. Copy templates and customize
+cp templates/tool-policy.md customer-service-agent-policy.md
+# Edit: Tool name, allowed actions, budget limits ($50/day)
+
+# 3. Use cloud examples as starting point  
+cat examples/aws-notes.md  # Copy Terraform egress rules
+# Modify IP addresses/endpoints for your environment
+
+# 4. Implement controls and collect evidence
+# A1: Set up 15-minute IAM tokens
+# A2: Configure per-session budgets
+# A6: Deploy egress allow-lists
+```
+
+**Result:** Secure AI agent deployed faster than building security from scratch, with audit-ready documentation.
+
+## What This Framework Provides
 
 - **6 Core Security Controls (A1-A6)** mapped to industry standards (NIST, ISO 27001, SOC2)
 - **Implementation Guidance** for AWS, Azure, and GCP
