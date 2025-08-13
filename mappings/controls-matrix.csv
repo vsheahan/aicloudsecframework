@@ -1,7 +1,7 @@
-ISO/IEC 42001,Control ID,Title,Risk,Owner,Status,Evidence,NIST CSF,NIST 800-53 Rev5,ISO 27001:2022,ISO 27017,ISO 27018,ISO 27701,SOC2
-"5.4.2; 6.3.3",A1,Identity for Agents and Tools,Privilege misuse,,, ,PR.AC-1,"AC-2, AC-6","A.5.15, A.8.2",12.1.5,10.1.1,7.2.2,CC6.1
-"6.3.4",A2,Tool Policy and Budget Guards,Unbounded actions,,, ,PR.AC-4,"CM-7, AU-12",A.8.16,12.4.5,11.1.1,8.2.1,CC7.2
-"6.4.2; 6.5.3",A3,Retrieval Safety,Sensitive data leakage,,, ,PR.DS-1,"SC-7, MP-5",A.8.12,18.1.3,9.1.1,7.2.7,CC8.1
-"6.4.5; 6.5.5",A4,Supply Chain Integrity,Tampered artifacts,,, ,ID.SC-1,"SI-7, SA-12",A.5.23,12.5.1,12.1.1,7.2.3,CC1.2
-"6.6.3",A5,Observation and Forensics,Lack of traceability,,, ,DE.AE-1,"AU-2, AU-12",A.8.15,12.4.1,11.2.1,7.5.1,CC3.2
-"6.5.4; 6.6.4",A6,Egress and Cost Controls,Exfiltration and spend spikes,,, ,PR.PT-1,"SC-7, AU-6",A.8.7,13.1.1,11.3.1,7.4.7,CC6.6
+Control ID,Title,Risk,Owner,Status,Evidence,ISO/IEC 42001,NIST CSF,NIST 800-53 Rev5,ISO 27001:2022,ISO 27017,ISO 27018,ISO 27701,SOC2
+A1,Identity for Agents and Tools,Privilege misuse,,, ,"5.4.2; 6.3.3",PR.AC-1,"AC-2, AC-6","A.5.15, A.8.2",12.1.5,10.1.1,7.2.2,CC6.1
+A2,Tool Policy and Budget Guards,Unbounded actions,,, ,"6.3.4",PR.AC-4,"CM-7, AU-12",A.8.16,12.4.5,11.1.1,8.2.1,CC7.2
+A3,Retrieval Safety,Sensitive data leakage,,, ,"6.4.2; 6.5.3",PR.DS-1,"SC-7, MP-5",A.8.12,18.1.3,9.1.1,7.2.7,CC8.1
+A4,Supply Chain Integrity,Tampered artifacts,,, ,"6.4.5; 6.5.5",ID.SC-1,"SI-7, SA-12",A.5.23,12.5.1,12.1.1,7.2.3,CC1.2
+A5,Observation and Forensics,Lack of traceability,,, ,"6.6.3",DE.AE-1,"AU-2, AU-12",A.8.15,12.4.1,11.2.1,7.5.1,CC3.2
+A6,Egress and Cost Controls,Exfiltration and spend spikes,,, ,"6.5.4; 6.6.4",PR.PT-1,"SC-7, AU-6",A.8.7,13.1.1,11.3.1,7.4.7,CC6.6
