@@ -28,28 +28,28 @@ python3 validate-aws-controls.py --output json
 ### What It Validates
 
 **Control A1 - Identity for Agents and Tools:**
-- ✅ IAM role session duration ≤ 15 minutes
-- ✅ Proper control tagging
-- ✅ Assume role policy conditions
+- PASS: IAM role session duration ≤ 15 minutes
+- PASS: Proper control tagging
+- PASS: Assume role policy conditions
 
 **Control A2 - Tool Policy and Budget Guards:**
-- ✅ DynamoDB budget tracking table exists
-- ✅ TTL enabled for session cleanup
-- ✅ Proper table schema (session_id, tool_name)
+- PASS: DynamoDB budget tracking table exists
+- PASS: TTL enabled for session cleanup
+- PASS: Proper table schema (session_id, tool_name)
 
 **Control A5 - Observation and Forensics:**
-- ✅ CloudTrail configured and logging
-- ✅ Bedrock data events captured
-- ✅ Audit logs bucket with encryption
-- ✅ Bucket versioning enabled
+- PASS: CloudTrail configured and logging
+- PASS: Bedrock data events captured
+- PASS: Audit logs bucket with encryption
+- PASS: Bucket versioning enabled
 
 **Control A6 - Egress and Cost Controls:**
-- ✅ AI agent VPC exists
-- ✅ Restrictive Network ACLs
-- ⚠️ Cost anomaly detection (manual verification)
+- PASS: AI agent VPC exists
+- PASS: Restrictive Network ACLs
+- WARNING: Cost anomaly detection (manual verification)
 
 **Controls A3 & A4:**
-- ⚠️ Manual verification required for data classification and supply chain
+- WARNING: Manual verification required for data classification and supply chain
 
 ### Exit Codes
 
@@ -65,22 +65,22 @@ Region: us-east-1
 Timestamp: 2024-01-15T10:30:00
 
 ═══ Control A1: Identity for Agents and Tools ═══
-✓ PASS: IAM role session duration: 900s (≤15 minutes)
-✓ PASS: IAM role properly tagged with Control: A1
-✓ PASS: Assume role policy includes security conditions
+PASS: IAM role session duration: 900s (≤15 minutes)
+PASS: IAM role properly tagged with Control: A1
+PASS: Assume role policy includes security conditions
 
 ═══ Control A2: Tool Policy and Budget Guards ═══
-✓ PASS: DynamoDB TTL enabled for session cleanup
-✓ PASS: Budget tracking table has session_id hash key
-✓ PASS: Budget tracking table has tool_name range key
+PASS: DynamoDB TTL enabled for session cleanup
+PASS: Budget tracking table has session_id hash key
+PASS: Budget tracking table has tool_name range key
 
 ═══ VALIDATION SUMMARY ═══
-✓ Control A1: PASS
-✓ Control A2: PASS
-⚠ Control A3: MANUAL
-⚠ Control A4: MANUAL
-✓ Control A5: PASS
-✓ Control A6: PASS
+Control A1: PASS
+Control A2: PASS
+Control A3: MANUAL
+Control A4: MANUAL
+Control A5: PASS
+Control A6: PASS
 
 OVERALL: PASSED - All automated checks successful
 ```
